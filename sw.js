@@ -1,5 +1,6 @@
 // Offline support. The page: network first, cache when offline. Other files: cache first, refreshed in
 // the background. Bump CACHE when the file list changes.
+// Cache storage is shared by every game on this domain, so only caches with our own prefix are ours to delete.
 const CACHE = "ten-rules-v1";
 // Only our own files and Google Fonts are cached. Everything else (analytics counts) goes straight to the network.
 const CACHEABLE = [self.location.origin, "https://fonts.googleapis.com", "https://fonts.gstatic.com"];
@@ -13,7 +14,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith("ten-rules-") && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
